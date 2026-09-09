@@ -1,22 +1,7 @@
 import React, { useMemo, useState } from "react";
 
-type IconName =
-  | "upload"
-  | "printer"
-  | "packageCheck"
-  | "sparkles"
-  | "cart"
-  | "mail"
-  | "phone"
-  | "mapPin";
-
-type IconProps = {
-  name: IconName;
-  className?: string;
-};
-
-function Icon({ name, className = "h-6 w-6" }: IconProps) {
-  const common: React.SVGProps<SVGSVGElement> = {
+function Icon({ name, className = "h-6 w-6" }) {
+  const common = {
     className,
     viewBox: "0 0 24 24",
     fill: "none",
@@ -27,7 +12,7 @@ function Icon({ name, className = "h-6 w-6" }: IconProps) {
     "aria-hidden": "true",
   };
 
-  const icons: Record<IconName, JSX.Element> = {
+  const icons = {
     upload: (
       <svg {...common}>
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -85,15 +70,10 @@ function Icon({ name, className = "h-6 w-6" }: IconProps) {
     ),
   };
 
-  return icons[name];
+  return icons[name] || icons.printer;
 }
 
-type CardProps = {
-  children: React.ReactNode;
-  className?: string;
-};
-
-function Card({ children, className = "" }: CardProps) {
+function Card({ children, className = "" }) {
   return (
     <div
       className={`rounded-3xl border border-white/10 bg-white/5 ${className}`}
@@ -103,21 +83,13 @@ function Card({ children, className = "" }: CardProps) {
   );
 }
 
-type ButtonProps = {
-  children: React.ReactNode;
-  href?: string;
-  type?: "button" | "submit" | "reset";
-  variant?: "solid" | "outline";
-  className?: string;
-};
-
 function Button({
   children,
   href,
   type = "button",
   variant = "solid",
   className = "",
-}: ButtonProps) {
+}) {
   const styles =
     variant === "outline"
       ? "border border-white/20 bg-transparent text-white hover:bg-white hover:text-black"
@@ -125,14 +97,12 @@ function Button({
 
   const base = `inline-flex items-center justify-center rounded-2xl px-5 py-3 font-semibold transition ${styles} ${className}`;
 
-  if (href) {
+  if (href)
     return (
       <a href={href} className={base}>
         {children}
       </a>
     );
-  }
-
   return (
     <button type={type} className={base}>
       {children}
@@ -140,15 +110,7 @@ function Button({
   );
 }
 
-type SizeName = "Tiny" | "Small" | "Big" | "Massive";
-
-type SizePrice = {
-  grams: string;
-  price: string;
-  example: string;
-};
-
-const sizePrices: Record<SizeName, SizePrice> = {
+const sizePrices = {
   Tiny: {
     grams: "5–15g",
     price: "₹49–₹149",
@@ -171,21 +133,8 @@ const sizePrices: Record<SizeName, SizePrice> = {
   },
 };
 
-const sizeOptions: SizeName[] = ["Tiny", "Small", "Big", "Massive"];
-
-type OrderForm = {
-  name: string;
-  email: string;
-  item: string;
-  size: SizeName;
-  material: string;
-  color: string;
-  quantity: string;
-  details: string;
-};
-
-function buildOrderEmailBody(form: OrderForm) {
-  const sizeInfo = sizePrices[form.size];
+function buildOrderEmailBody(form) {
+  const sizeInfo = sizePrices[form.size] || sizePrices.Small;
   return [
     "Hi, I want to order a 3D printed item.",
     "",
@@ -204,14 +153,14 @@ function buildOrderEmailBody(form: OrderForm) {
   ].join("\n");
 }
 
-function createMailtoLink(form: OrderForm) {
+function createMailtoLink(form) {
   const subject = encodeURIComponent("3D Printing Order Request");
   const body = encodeURIComponent(buildOrderEmailBody(form));
-  return `mailto:Varish.gss@gmail.com?subject=${subject}&body=${body}`;
+  return `mailto:yourbusiness@email.com?subject=${subject}&body=${body}`;
 }
 
 function runSelfTests() {
-  const testForm: OrderForm = {
+  const testForm = {
     name: "Test User",
     email: "test@example.com",
     item: "Phone stand",
@@ -244,7 +193,7 @@ function runSelfTests() {
     "Email body should include quantity"
   );
 
-  const massiveForm: OrderForm = { ...testForm, size: "Massive" };
+  const massiveForm = { ...testForm, size: "Massive" };
   console.assert(
     buildOrderEmailBody(massiveForm).includes("₹900+"),
     "Massive size should show ₹900+"
@@ -252,7 +201,7 @@ function runSelfTests() {
 
   const link = createMailtoLink(testForm);
   console.assert(
-    link.startsWith("mailto:Varish.gss@gmail.com"),
+    link.startsWith("mailto:yourbusiness@email.com"),
     "Mailto link should use business email"
   );
   console.assert(
@@ -267,8 +216,8 @@ function runSelfTests() {
 
 if (typeof window !== "undefined") runSelfTests();
 
-export default function App() {
-  const [form, setForm] = useState<OrderForm>({
+export default function ThreeDPrintingOrderWebsite() {
+  const [form, setForm] = useState({
     name: "",
     email: "",
     item: "",
@@ -312,17 +261,17 @@ export default function App() {
   const steps = useMemo(
     () => [
       {
-        icon: "upload" as IconName,
+        icon: "upload",
         title: "Send Your Idea",
         text: "Upload or describe your model, sketch, or reference image.",
       },
       {
-        icon: "printer" as IconName,
+        icon: "printer",
         title: "We Estimate by Grams",
         text: "Price is estimated using filament grams, size, material, supports, and print time.",
       },
       {
-        icon: "packageCheck" as IconName,
+        icon: "packageCheck",
         title: "Pickup or Delivery",
         text: "Collect your order or get it delivered after the print is finished.",
       },
@@ -332,16 +281,12 @@ export default function App() {
 
   const selectedSize = sizePrices[form.size];
 
-  const handleChange = (
-    event: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
+  const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((currentForm) => ({ ...currentForm, [name]: value }));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
     window.location.href = createMailtoLink(form);
   };
@@ -410,16 +355,13 @@ export default function App() {
                   print time, and model difficulty.
                 </p>
                 <div className="mt-8 grid grid-cols-2 gap-3 text-sm">
-                  {sizeOptions.map((size) => {
-                    const data = sizePrices[size];
-                    return (
-                      <div key={size} className="rounded-2xl bg-white/10 p-4">
-                        <p className="font-bold">{size}</p>
-                        <p className="text-neutral-300">{data.grams}</p>
-                        <p className="mt-1 font-bold">{data.price}</p>
-                      </div>
-                    );
-                  })}
+                  {Object.entries(sizePrices).map(([size, data]) => (
+                    <div key={size} className="rounded-2xl bg-white/10 p-4">
+                      <p className="font-bold">{size}</p>
+                      <p className="text-neutral-300">{data.grams}</p>
+                      <p className="mt-1 font-bold">{data.price}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -475,23 +417,20 @@ export default function App() {
           grams and print difficulty.
         </p>
         <div className="mt-8 grid gap-6 md:grid-cols-4">
-          {sizeOptions.map((size) => {
-            const data = sizePrices[size];
-            return (
-              <Card key={size} className="text-white">
-                <div className="p-8">
-                  <h3 className="text-2xl font-bold">{size}</h3>
-                  <p className="mt-4 text-4xl font-black">{data.price}</p>
-                  <p className="mt-4 text-neutral-300">
-                    Estimated filament: {data.grams}
-                  </p>
-                  <p className="mt-3 text-sm text-neutral-400">
-                    Examples: {data.example}
-                  </p>
-                </div>
-              </Card>
-            );
-          })}
+          {Object.entries(sizePrices).map(([size, data]) => (
+            <Card key={size} className="text-white">
+              <div className="p-8">
+                <h3 className="text-2xl font-bold">{size}</h3>
+                <p className="mt-4 text-4xl font-black">{data.price}</p>
+                <p className="mt-4 text-neutral-300">
+                  Estimated filament: {data.grams}
+                </p>
+                <p className="mt-3 text-sm text-neutral-400">
+                  Examples: {data.example}
+                </p>
+              </div>
+            </Card>
+          ))}
         </div>
       </section>
 
@@ -598,7 +537,7 @@ export default function App() {
                 name="details"
                 value={form.details}
                 onChange={handleChange}
-                rows={5}
+                rows="5"
                 placeholder="Extra details, size in cm, file link, delivery address, deadline, etc."
                 className="rounded-2xl border border-white/10 bg-neutral-950 px-4 py-3 outline-none focus:border-white/40"
               />
@@ -623,10 +562,10 @@ export default function App() {
           </div>
           <div className="space-y-3 text-neutral-300">
             <p className="flex items-center gap-2">
-              <Icon name="mail" className="h-4 w-4" /> Varish.gss@gmail.com
+              <Icon name="mail" className="h-4 w-4" /> yourbusiness@email.com
             </p>
             <p className="flex items-center gap-2">
-              <Icon name="phone" className="h-4 w-4" /> +91 6364910263
+              <Icon name="phone" className="h-4 w-4" /> +91 98765 43210
             </p>
             <p className="flex items-center gap-2">
               <Icon name="mapPin" className="h-4 w-4" /> Bengaluru, India
