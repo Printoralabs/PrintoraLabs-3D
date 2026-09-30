@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "PrintoraLabs 3D printing website",
+  "description": "Printora 3D — Professional 3D printing marketplace",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
@@ -12,12 +12,17 @@
   "dependencies": {
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "react-router-dom": "6.28.0",
+    "lucide-react": "0.468.0",
     "scheduler": "0.23.2"
   },
   "devDependencies": {
     "@types/react": "18.3.24",
     "@types/react-dom": "18.3.7",
     "@vitejs/plugin-react": "4.7.0",
+    "autoprefixer": "10.4.20",
+    "postcss": "8.4.49",
+    "tailwindcss": "3.4.17",
     "typescript": "5.5.4",
     "vite": "5.4.19"
   }
